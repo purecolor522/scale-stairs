@@ -1,0 +1,5 @@
+# 不發佈來源 PDF（版權素材）與測試檔
+*.pdf
+*.png
+.playwright-mcp/
+.DS_Store

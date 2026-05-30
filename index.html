@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="音階小教室" />
+<meta name="theme-color" content="#97a17e" />
+<title>音階小教室 · Visual Music Theory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <nav class="nav">
+    <div class="brand">
+      <span class="brand-eyes" aria-hidden="true">
+        <span class="eye"><i></i></span>
+        <span class="eye"><i></i></span>
+      </span>
+      <span class="brand-name">音階小教室</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#piano">🎹 鋼琴鍵盤</a></li>
+      <li><a href="#diagram">📊 圖解音階</a></li>
+      <li><a href="#game">🪜 階梯遊戲</a></li>
+    </ul>
+  </nav>
+
+  <div class="hero-inner">
+    <div class="hero-text">
+      <p class="hero-kicker">Visual Music Theory · Book 4</p>
+      <h1 class="hero-title">用<span class="hl">圖解</span>和<span class="hl">小遊戲</span><br>輕鬆學會<span class="hl">音階</span>！</h1>
+      <p class="hero-sub">點點鋼琴聽聲音、看圖認識全音半音、再玩階梯遊戲蓋出你自己的大調音階。</p>
+      <div class="hero-btns">
+        <a class="btn btn-coral" href="#piano">開始彈鋼琴 🎹</a>
+        <a class="btn btn-ghost" href="#game">玩階梯遊戲 🪜</a>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <!-- bouncing note-people, like the PDF cover -->
+      <span class="note-dude c1"><span class="face">^‿^</span></span>
+      <span class="note-dude c2"><span class="face">•ᴗ•</span></span>
+      <span class="note-dude c3"><span class="face">^o^</span></span>
+      <span class="note-dude c4"><span class="face">•‿•</span></span>
+      <span class="note-dude c5"><span class="face">⌒‿⌒</span></span>
+    </div>
+  </div>
+  <div class="hero-hills" aria-hidden="true"></div>
+</header>
+
+<main>
+
+  <!-- ================= PIANO ================= -->
+  <section id="piano" class="panel">
+    <div class="bubble-title">🎹 互動鋼琴鍵盤</div>
+    <p class="lead">點一下琴鍵就會發出聲音。選一個調與音階，琴鍵會亮起來告訴你「這個音階用到哪些鍵」，再按 ▶ 就能聽到整段音階。</p>
+
+    <div class="piano-controls">
+      <div class="ctrl-group">
+        <label>主音（Root）</label>
+        <div class="seg" id="pianoRoot"></div>
+      </div>
+      <div class="ctrl-group">
+        <label>音階種類</label>
+        <div class="seg" id="pianoScale"></div>
+      </div>
+      <div class="ctrl-group">
+        <label>音名顯示</label>
+        <div class="seg" id="pianoLabel">
+          <button data-val="letter" class="seg-btn active">字母 ABC</button>
+          <button data-val="solfege" class="seg-btn">唱名 Do Re Mi</button>
+          <button data-val="off" class="seg-btn">隱藏</button>
+        </div>
+      </div>
+      <div class="ctrl-group ctrl-actions">
+        <button id="playScaleBtn" class="btn btn-coral small">▶ 播放音階</button>
+      </div>
+    </div>
+
+    <div class="scale-readout" id="scaleReadout"></div>
+
+    <div class="piano-wrap">
+      <div class="piano" id="pianoEl" role="group" aria-label="鋼琴鍵盤"></div>
+    </div>
+    <p class="hint">小提示：也可以用電腦鍵盤 <kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><kbd>F</kbd><kbd>G</kbd><kbd>H</kbd><kbd>J</kbd>… 來彈白鍵，<kbd>W</kbd><kbd>E</kbd><kbd>T</kbd><kbd>Y</kbd><kbd>U</kbd> 彈黑鍵。</p>
+  </section>
+
+  <!-- ================= SCALE DIAGRAM ================= -->
+  <section id="diagram" class="panel">
+    <div class="bubble-title">📊 圖解音階：全音與半音</div>
+    <p class="lead">大調音階的祕密就是這串階梯：<b>全 - 全 - 半 - 全 - 全 - 全 - 半</b>。
+      <span class="chip chip-coral">↷ 全音 Whole Step</span>
+      <span class="chip chip-green">↷ 半音 Half Step</span>
+      換個調試試看，哪些音需要加上 ♯ 或 ♭ 呢？</p>
+
+    <div class="ctrl-group center">
+      <label>選一個大調</label>
+      <div class="seg" id="diagramRoot"></div>
+    </div>
+
+    <div class="diagram-stage">
+      <div class="key-pill" id="keyPill">C 大調</div>
+      <div class="note-zone">
+        <div class="note-row" id="noteRow"></div>
+        <svg class="arrow-layer" id="arrowLayer" aria-hidden="true"></svg>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="step-box"></span><span class="step-box"></span><i class="arc coral"></i><span>全音 Whole Step（跳過一個鍵）</span></div>
+      <div class="legend-item"><span class="step-box"></span><span class="step-box"></span><i class="arc green"></i><span>半音 Half Step（緊鄰的下一個鍵）</span></div>
+    </div>
+  </section>
+
+  <!-- ================= STAIRCASE GAME ================= -->
+  <section id="game" class="panel">
+    <div class="bubble-title">🪜 音階階梯遊戲</div>
+    <p class="lead">小音符要從底層爬到最高的八度！每一階都要選對「全音」或「半音」，照著大調的祕密公式 <b>全全半全全全半</b> 一路往上蓋。蓋對了小音符就會往上跳，蓋錯就要再想想看～</p>
+
+    <div class="game-bar">
+      <div class="ctrl-group">
+        <label>從哪個音開始</label>
+        <div class="seg" id="gameRoot"></div>
+      </div>
+      <div class="game-stats">
+        <div class="stat"><span class="stat-num" id="gameScore">0</span><span class="stat-label">分數</span></div>
+        <div class="stat"><span class="stat-num" id="gameStreak">0</span><span class="stat-label">連對</span></div>
+      </div>
+      <div class="game-toggle">
+        <label class="switch">
+          <input type="checkbox" id="hintToggle" checked />
+          <span class="slider"></span>
+        </label>
+        <span>提示模式</span>
+      </div>
+      <button id="resetGameBtn" class="btn btn-ghost small">↺ 重新開始</button>
+    </div>
+
+    <div class="staircase-stage">
+      <svg class="stair-arrows" id="stairArrows" aria-hidden="true"></svg>
+      <div class="staircase" id="staircase"></div>
+      <div class="mascot" id="mascot" aria-hidden="true">
+        <span class="eye"><i></i></span><span class="eye"><i></i></span>
+      </div>
+    </div>
+
+    <div class="game-prompt" id="gamePrompt">準備好了嗎？按下面的按鈕，幫小音符爬上第一階！</div>
+
+    <div class="game-buttons">
+      <button class="big-step coral" id="wholeBtn">
+        <span class="big-step-icon">↷</span>
+        <span class="big-step-main">全音</span>
+        <span class="big-step-sub">Whole Step</span>
+      </button>
+      <button class="big-step green" id="halfBtn">
+        <span class="big-step-icon">↷</span>
+        <span class="big-step-main">半音</span>
+        <span class="big-step-sub">Half Step</span>
+      </button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span class="footer-eyes"><span class="eye sm"><i></i></span><span class="eye sm"><i></i></span></span>
+  <p>音階小教室 · 風格參考 Piazoo《Visual Music Theory》Book 4　|　用 ❤️ 與 Web Audio 製作</p>
+</footer>
+
+<!-- celebration confetti container -->
+<div class="confetti" id="confetti" aria-hidden="true"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
