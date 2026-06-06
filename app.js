@@ -464,6 +464,7 @@ const Game = (() => {
   const stage    = document.getElementById('staircase');
   const arrows   = document.getElementById('stairArrows');
   const mascot   = document.getElementById('mascot');
+  const vpiano   = document.getElementById('vpiano');
   const promptEl = document.getElementById('gamePrompt');
   const wholeBtn = document.getElementById('wholeBtn');
   const halfBtn  = document.getElementById('halfBtn');
@@ -477,6 +478,11 @@ const Game = (() => {
   let stepIndex = 0;        // 目前要決定第幾個間距
   let score = 0, streak = 0;
   let busy = false;
+  let vkeys = {};           // semitoneOffset(0..12) -> {el, cy, isBlack}
+  let climber = null;       // 直式鋼琴上往上爬的指標
+
+  const BLACK_PCS = [1,3,6,8,10];
+  function cumOffset(i){ let o = 0; for (let k = 0; k < i; k++) o += PATTERN[k]; return o; }
 
   function layoutFor(i, total){
     // i:0..total-1，從左下到右上
@@ -537,13 +543,72 @@ const Game = (() => {
     return midi;
   }
 
+  // 建立一台「從主音到高八度」的直式鋼琴（低音在下、高音在上）
+  function buildVPiano(){
+    vpiano.innerHTML = '';
+    vkeys = {};
+    const H = vpiano.clientHeight || 340;
+    const slot = H / 8;                       // 8 個白鍵
+    const rootPc = LETTER_PC[root];
+    let whiteIndex = 0;
+
+    for (let s = 0; s <= 12; s++){
+      const pc = (rootPc + s) % 12;
+      const isBlack = BLACK_PCS.includes(pc);
+      const k = document.createElement('div');
+      let cy;
+      if (isBlack){
+        const h = slot * 0.62;
+        cy = H - whiteIndex * slot;            // 落在前一個白鍵的上緣（兩白鍵交界）
+        k.className = 'vkey black';
+        k.style.height = h + 'px';
+        k.style.top = (cy - h / 2) + 'px';
+      } else {
+        cy = H - (whiteIndex + 0.5) * slot;
+        k.className = 'vkey white';
+        k.style.height = slot + 'px';
+        k.style.top = (H - (whiteIndex + 1) * slot) + 'px';
+        const lab = document.createElement('span');
+        lab.className = 'vlabel';
+        const sp = pcToSharpSpelling(pc);
+        lab.textContent = sp.letter + accSymbol(sp.acc);
+        k.appendChild(lab);
+        whiteIndex++;
+      }
+      vpiano.appendChild(k);
+      vkeys[s] = { el: k, cy, isBlack };
+    }
+    // 爬升指標
+    climber = document.createElement('div');
+    climber.className = 'vclimber';
+    vpiano.appendChild(climber);
+  }
+
+  // 點亮第 i 個音對應的琴鍵，並讓指標爬上去
+  function lightVKey(i, animate){
+    const off = cumOffset(i);
+    const vk = vkeys[off];
+    if (!vk) return;
+    Object.values(vkeys).forEach(v => v.el.classList.remove('current'));
+    vk.el.classList.add('lit', 'current');
+    if (i === 0) vk.el.classList.add('vroot');
+    if (climber){
+      climber.style.top = vk.cy + 'px';
+      if (animate){
+        climber.classList.remove('bump'); void climber.offsetWidth; climber.classList.add('bump');
+      }
+    }
+  }
+
   function reset(){
     placed = []; stepIndex = 0; busy = false;
     stage.innerHTML = '';
     arrows.innerHTML = '';
+    buildVPiano();
     const rootNote = { letter: root, acc:0, pc: LETTER_PC[root] };
     placed.push(rootNote);
     placeStep(rootNote, 0, 'root');
+    lightVKey(0, false);
     setButtons(true);
     updateStats();
     showPrompt(`小音符站在 ${root} 上囉！現在要往上一階——該選「全音」還是「半音」呢？`, '');
@@ -578,6 +643,7 @@ const Game = (() => {
       drawArrow(fromPos, toPos, whole);
       placed.push(nextNote);
       placeStep(nextNote, i, '');
+      lightVKey(i, true);                 // 直式鋼琴：琴鍵亮起 + 指標往上爬
       playMidi(currentMidi(i), 0, 0.6);
       chime(true);
       score += hintToggle.checked ? 5 : 10;
@@ -625,15 +691,28 @@ const Game = (() => {
     halfBtn.addEventListener('click',  () => { ensureAudio(); choose(false); });
     hintToggle.addEventListener('change', updateHint);
     document.getElementById('resetGameBtn').addEventListener('click', reset);
-    window.addEventListener('resize', () => {
+    const relayout = () => {
       // 重新排版已放好的步階
       const total = PATTERN.length + 1;
+      const positions = [];
       [...stage.children].forEach((c, i) => {
         const { x, y } = layoutFor(i, total);
         c.style.left = x+'px'; c.style.top = y+'px';
+        positions[i] = { x, y };
         if (i === placed.length-1) moveMascot(x,y);
       });
-    });
+      // 重畫階梯箭線
+      arrows.innerHTML = '';
+      for (let i = 0; i < placed.length - 1; i++){
+        drawArrow(positions[i], positions[i+1], PATTERN[i] === 2);
+      }
+      // 重建直式鋼琴並點亮已完成的音
+      buildVPiano();
+      for (let i = 0; i < placed.length; i++) lightVKey(i, false);
+    };
+    let gT;
+    window.addEventListener('resize', () => { clearTimeout(gT); gT = setTimeout(relayout, 120); });
+    window.addEventListener('orientationchange', () => setTimeout(relayout, 250));
     reset();
   }
   return { init };
